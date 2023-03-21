@@ -26,6 +26,26 @@ The string argument referenced after `--decision` is the name of a variable in p
 opa exec --decision 
 ```
 
+## Multiple decisions
+
+If you want to evaluate multiple decisions, you must query each variable separately (referencing their namespaced name) as an additional command line parameter.
+
+```bash
+opa exec --decision terraform/analysis/authz \
+  --decision terraform/analysis/something \
+  --bundle policies/ plan.json
+```
+
+An alternative way to potentially do this is to include a file that includes a decision that depends on code evaluations in other files. Provided they are in the same package they should be available.
+
+```go
+authz {
+    score < blast_radius
+    not touches_iam
+    something # Referenced from policies/additional.rego
+}
+```
+
 ## Policy bundle
 
 ```bash
