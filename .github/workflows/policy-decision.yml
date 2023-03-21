@@ -13,4 +13,6 @@ jobs:
         version: latest
 
     - name: Run OPA Tests
-      run: opa test policy.rego -v
+      run: | 
+        opa exec --decision terraform/analysis/authz \
+          --bundle policies/ plan.json
