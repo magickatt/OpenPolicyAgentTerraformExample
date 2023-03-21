@@ -1,12 +1,12 @@
 # Open Policy Agent example using Terraform
 
-Simple example of how to use [Open Policy Agent with Terraform](https://www.openpolicyagent.org/docs/latest/terraform/)
+Simple example of how to use [Open Policy Agent with Terraform](https://www.openpolicyagent.org/docs/latest/terraform/) including setting up a [GitHub Action](https://github.com/open-policy-agent/setup-opa).
 
-`main.tf` and `plan.json` are taken from the provided documentation (and are not based on any real infrastructure) purely to demonstrate how Open Policy Agent can be run within a container and subsequently a [GitHub Action](https://github.com/open-policy-agent/setup-opa).
+`main.tf` and `plan.json` are taken from the provided documentation (and are not based on any real infrastructure) purely to demonstrate how Open Policy Agent can be run within a container and subsequently the [GitHub Action](https://github.com/open-policy-agent/setup-opa).
 
-Documentation does not explain particularly well (for a newcomer) what each part of the supplied commands do, so please find a breakdown below. 
+Documentation does not explain particularly well (for a newcomer) what each part of the supplied commands do, so please find a breakdown below. Additionally there is a [slightly easier-to-read explanation](https://spacelift.io/blog/what-is-open-policy-agent-and-how-it-works#how-does-opa-work) of how OPA works.
 
-https://spacelift.io/blog/what-is-open-policy-agent-and-how-it-works#how-does-opa-work
+There is a provided Dockerfile to run the command below in a container, mounting the appropriate files.
 
 ```bash
 opa exec --decision terraform/analysis/authz --bundle policies/ plan.json
