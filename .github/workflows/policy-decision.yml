@@ -1,7 +1,7 @@
 name: Open Policy Agent
 on: [push]
 jobs:
-  Run-OPA-Tests:
+  Evaluate:
     runs-on: ubuntu-latest
     steps:
     - name: Check out repository code
