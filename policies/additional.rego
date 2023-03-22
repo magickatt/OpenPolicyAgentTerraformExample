@@ -1,3 +1,3 @@
 package additional_example
 
-default something := true
+default something := false
