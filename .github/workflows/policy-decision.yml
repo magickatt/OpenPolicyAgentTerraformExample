@@ -27,7 +27,7 @@ jobs:
         OPA_EVALUATION="$?"
 
         # If the evaluation fails, provide more information to explain why
-        if [ "$OPA_EVALUATION -ne 0 ]; then
+        if [ "$OPA_EVALUATION" -ne 0 ]; then
           echo "Terraform plan violates provided Open Policy Agent policies."
           exit $OPA_EVALUATION
         else
