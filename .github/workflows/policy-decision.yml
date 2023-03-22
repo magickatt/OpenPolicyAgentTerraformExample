@@ -14,4 +14,4 @@ jobs:
 
     - name: Run OPA Tests
       # run: opa exec --decision terraform/analysis/authz --bundle policies/ plan.json
-      run: opa eval -i plan.json -d policies/ data.enforce_policies.allow
+      run: opa eval -i plan.json -d policies/ data.enforce_policies.allow | jq
