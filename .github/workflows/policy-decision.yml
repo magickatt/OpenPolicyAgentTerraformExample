@@ -28,8 +28,14 @@ jobs:
 
         # If the evaluation fails, provide more information to explain why
         if [ "$OPA_EVALUATION" -ne 0 ]; then
-          echo "Terraform plan violates provided Open Policy Agent policies."
+          echo "Terraform plan violates provided Open Policy Agent policies.\n\n"
+          echo "Reasons\n-------------------------\n"
+
+          # Re-evaluate the policies to determine why they may have failed
+          opa eval --input plan.json --data policies/ data.enforce_policies.debug  | jq '.result[0].expressions[0].value | join("\n")' --raw-output
           exit $OPA_EVALUATION
+
+        # Otherwise the Terraform plan complies with all evaluated policies
         else
           echo "Terraform plan passes provided Open Policy Agent policies."
         fi

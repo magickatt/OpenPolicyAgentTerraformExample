@@ -43,7 +43,7 @@ touches_iam {
 }
 
 # Authorization holds if score for the plan is acceptable and no changes are made to IAM
-# default authz[msg] := false
+default authz := false
 # authz[msg] {
 authz {
     # desc := "Sample description"
