@@ -1,4 +1,4 @@
-name: Run OPA Tests
+name: Open Policy Agent
 on: [push]
 jobs:
   Run-OPA-Tests:
@@ -7,12 +7,12 @@ jobs:
     - name: Check out repository code
       uses: actions/checkout@v3
 
-    - name: Setup OPA
+    - name: Setup Open Policy Agent
       uses: open-policy-agent/setup-opa@v2
       with:
         version: latest
 
-    - name: Run OPA Tests
+    - name: Evaluate Terraform plan
       # run: opa exec --decision terraform/analysis/authz --bundle policies/ plan.json
       # run: opa eval -i plan.json -d policies/ data.enforce_policies.allow | jq
       # shell: bash
