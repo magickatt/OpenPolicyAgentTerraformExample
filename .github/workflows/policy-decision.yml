@@ -16,10 +16,4 @@ jobs:
       # run: opa exec --decision terraform/analysis/authz --bundle policies/ plan.json
       # run: opa eval -i plan.json -d policies/ data.enforce_policies.allow | jq
       run: | 
-        opa eval \ 
-        --input plan.json \
-        --data policies/ \
-        data.enforce_policies.allow \
-        | jq '.result[0].expressions[0].value' \
-        --raw-output \
-        --exit-status
+        opa eval --input plan.json --data policies/ data.enforce_policies.allow | jq '.result[0].expressions[0].value' --raw-output --exit-status
