@@ -7,8 +7,7 @@ import input as tfplan
 ########################
 
 # acceptable score for automated authorization
-# blast_radius := 30
-blast_radius := 10
+blast_radius := 30
 
 # weights assigned for each operation on each resource-type
 weights := {
@@ -37,6 +36,7 @@ score := s {
 }
 
 # Whether there is any change to IAM
+default touches_iam := false
 touches_iam {
     all := resources["aws_iam"]
     count(all) > 0
@@ -44,18 +44,9 @@ touches_iam {
 
 # Authorization holds if score for the plan is acceptable and no changes are made to IAM
 default authz := false
-# authz[msg] {
 authz {
-    # desc := "Sample description"
-    # msg := sprintf("Sample message, score is %d, blast radius is %d", [score, blast_radius])
-    score > blast_radius
+    score < blast_radius
     not touches_iam
-}
-
-default touches_kms := false
-does_touch_kms[msg] {
-    msg := "Changes were made to KMS"
-    not touches_kms
 }
 
 ####################
@@ -80,7 +71,6 @@ num_creates[resource_type] := num {
     creates := [res |  res:= all[_]; res.change.actions[_] == "create"]
     num := count(creates)
 }
-
 
 # number of deletions of resources of a given type
 num_deletes[resource_type] := num {
