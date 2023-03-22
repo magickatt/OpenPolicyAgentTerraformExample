@@ -26,7 +26,33 @@ The string argument referenced after `--decision` is the name of a variable in p
 opa exec --decision 
 ```
 
-## Multiple decisions
+### Adding description and message to decision output
+
+By default the output from a decision will be fairly basic, simply telling you what input data was evaluated and what the result of the decision was.
+
+```json
+{
+  "result": [
+    {
+      "path": "plan.json",
+      "result": true
+    }
+  ]
+}
+```
+
+For Continuous Integration checks this is not overly useful, so you can supply a description and message if the decision is not successful.
+
+```go
+authz[msg] {
+    desc := "Sample description"
+    msg := sprintf("Sample message, score is %d, blast radius is %d", [score, blast_radius])
+    score < blast_radius
+    not touches_iam
+}
+```
+
+### Multiple decisions
 
 If you want to evaluate multiple decisions, you must query each variable separately (referencing their namespaced name) as an additional command line parameter.
 
