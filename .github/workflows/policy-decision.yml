@@ -17,7 +17,7 @@ jobs:
       # run: opa eval -i plan.json -d policies/ data.enforce_policies.allow | jq
       # shell: bash
       run: | 
-        set -o pipefail
+        set +e pipefail
         opa eval --input plan.json --data policies/ data.enforce_policies.allow | jq '.result[0].expressions[0].value' --raw-output --exit-status &>/dev/null
         if [ "$?" -ne 0 ]; then
           echo "Terraform plan violates provided Open Policy Agent policies."
