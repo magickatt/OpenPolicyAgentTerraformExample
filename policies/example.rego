@@ -1,4 +1,4 @@
-package terraform.analysis
+package opa_terraform_example
 
 import input as tfplan
 
@@ -7,7 +7,8 @@ import input as tfplan
 ########################
 
 # acceptable score for automated authorization
-blast_radius := 30
+# blast_radius := 30
+blast_radius := 10
 
 # weights assigned for each operation on each resource-type
 weights := {
@@ -21,13 +22,6 @@ resource_types := {"aws_autoscaling_group", "aws_instance", "aws_iam", "aws_laun
 #########
 # Policy
 #########
-
-# Authorization holds if score for the plan is acceptable and no changes are made to IAM
-default authz := false
-authz {
-    score < blast_radius
-    not touches_iam
-}
 
 # Compute the score for a Terraform plan as the weighted sum of deletions, creations, modifications
 score := s {
@@ -46,6 +40,22 @@ score := s {
 touches_iam {
     all := resources["aws_iam"]
     count(all) > 0
+}
+
+# Authorization holds if score for the plan is acceptable and no changes are made to IAM
+# default authz[msg] := false
+# authz[msg] {
+authz {
+    # desc := "Sample description"
+    # msg := sprintf("Sample message, score is %d, blast radius is %d", [score, blast_radius])
+    score > blast_radius
+    not touches_iam
+}
+
+default touches_kms := false
+does_touch_kms[msg] {
+    msg := "Changes were made to KMS"
+    not touches_kms
 }
 
 ####################
