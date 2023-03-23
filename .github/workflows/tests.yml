@@ -1,0 +1,24 @@
+name: Open Policy Agent tests
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "policies/*.rego"
+  pull_request:
+    paths:
+      - "policies/*.rego"
+jobs:
+  Test:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Check out repository code
+      uses: actions/checkout@v3
+
+    - name: Setup Open Policy Agent
+      uses: open-policy-agent/setup-opa@v2
+      with:
+        version: latest
+
+    - name: Run unit tests
+      run: opa test policies -v 
