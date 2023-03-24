@@ -1,16 +1,41 @@
 # Open Policy Agent example using Terraform
 
-Simple example of how to use [Open Policy Agent with Terraform](https://www.openpolicyagent.org/docs/latest/terraform/) including setting up a [GitHub Action](https://github.com/open-policy-agent/setup-opa).
+Simple example of how to use [Open Policy Agent with Terraform](https://www.openpolicyagent.org/docs/latest/terraform/) including setting up a [GitHub Action](https://github.com/open-policy-agent/setup-opa). This should help explain the following concepts...
+
+* What is a Policy?
+* What is a Rule?
+* How are Rules evaluated in a Policy?
+* How do you Query a Rule?
+* How do you Query multiple Rules at once? 
 
 `main.tf` and `plan.json` are taken from the provided documentation (and are not based on any real infrastructure) purely to demonstrate how Open Policy Agent can be run within a container and subsequently the [GitHub Action](https://github.com/open-policy-agent/setup-opa).
 
-Documentation does not explain particularly well (for a newcomer) what each part of the supplied commands do, so please find a breakdown below. Additionally there is a [slightly easier-to-read explanation](https://spacelift.io/blog/what-is-open-policy-agent-and-how-it-works#how-does-opa-work) of how OPA works.
+Documentation does not explain particularly well (for a newcomer) what each part of the supplied commands do, so please find a breakdown below. Additionally there is a [slightly easier-to-read explanation](https://spacelift.io/blog/what-is-open-policy-agent-and-how-it-works#how-does-opa-work) of how OPA works. Here we will be looking at evaluating multiple Rules using a Query.
 
-There is a provided Dockerfile to run the command below in a container, mounting the appropriate files.
+## Quick example
+
+You can run the provided Bash script if you have Open Policy Agent installed locally, or alternatively there is a provided Dockerfile to run the script in a container, mounting the appropriate files.
 
 ```bash
-opa exec --decision terraform/analysis/authz --bundle policies/ plan.json
+./test.sh
+
+Terraform plan passes provided Open Policy Agent policies.
 ```
+
+The Docker example is simplified, so please run test.sh locally to see an example of how to provide feedback on which rules deny.
+
+```bash
+./docker.sh
+
+Does the Terraform plan comply with the provided Open Policy Agent policies?
+true
+```
+## What is a Policy?
+
+## What is a Rule?
+## How are Rules evaluated in a Policy?
+## How do you Query a Rule?
+## How do you Query multiple Rules at once? 
 
 ## Decision
 
