@@ -12,6 +12,14 @@ Simple example of how to use [Open Policy Agent with Terraform](https://www.open
 
 Documentation does not explain particularly well (for a newcomer) what each part of the supplied commands do, so please find a breakdown below. Additionally there is a [slightly easier-to-read explanation](https://spacelift.io/blog/what-is-open-policy-agent-and-how-it-works#how-does-opa-work) of how OPA works. Here we will be looking at evaluating multiple Rules using a Query.
 
+## Contents
+* [Quick example](#quick-example)
+* [What is a Policy?](#what-is-a-policy)
+* [What is a Rule?](#what-is-a-rule)
+* [How are Rules evaluated in a Policy?](#how-are-rules-evaluated-in-a-policy)
+* [How do you Query a Rule?](#how-do-you-query-a-rule)
+* [How do you Query multiple Rules at once?](#how-do-you-query-multiple-rules-at-once)
+
 ## Quick example
 
 You can run the provided Bash script if you have Open Policy Agent installed locally, or alternatively there is a provided Dockerfile to run the script in a container, mounting the appropriate files.
@@ -30,6 +38,7 @@ The Docker example is simplified, so please run test.sh locally to see an exampl
 Does the Terraform plan comply with the provided Open Policy Agent policies?
 true
 ```
+
 ## What is a Policy?
 
 ## What is a Rule?
