@@ -1,14 +1,12 @@
 # Open Policy Agent example using Terraform
 
-Simple example of how to use [Open Policy Agent with Terraform](https://www.openpolicyagent.org/docs/latest/terraform/) including setting up a [GitHub Action](https://github.com/open-policy-agent/setup-opa). This should help explain the following concepts...
+Simple example of how to use [Open Policy Agent with Terraform](https://www.openpolicyagent.org/docs/latest/terraform/) including setting up a [GitHub Action](https://github.com/open-policy-agent/setup-opa).
 
-* What is a Policy?
-* What is a Rule?
-* How are Rules evaluated in a Policy?
-* How do you Query a Rule?
-* How do you Query multiple Rules at once? 
+The Agent can either be run as an API (that you can query) or in standalone mode (via the command line) and requires 3 things
 
-`main.tf` and `plan.json` are taken from the provided documentation (and are not based on any real infrastructure) purely to demonstrate how Open Policy Agent can be run within a container and subsequently the [GitHub Action](https://github.com/open-policy-agent/setup-opa).
+* Policies
+* Input
+* Query
 
 Documentation does not explain particularly well (for a newcomer) what each part of the supplied commands do, so please find a breakdown below. Additionally there is a [slightly easier-to-read explanation](https://spacelift.io/blog/what-is-open-policy-agent-and-how-it-works#how-does-opa-work) of how OPA works. Here we will be looking at evaluating multiple Rules using a Query.
 
@@ -22,7 +20,9 @@ Documentation does not explain particularly well (for a newcomer) what each part
 
 ## Quick example
 
-You can run the provided Bash script if you have Open Policy Agent installed locally, or alternatively there is a provided Dockerfile to run the script in a container, mounting the appropriate files.
+`main.tf` and `plan.json` are taken from the [provided documentation](https://www.openpolicyagent.org/docs/latest/) (and are not based on any real infrastructure) purely to demonstrate how Open Policy Agent can be run within a container and subsequently the [GitHub Action](https://github.com/open-policy-agent/setup-opa).
+
+You can run the provided Bash script if you have [Open Policy Agent installed locally](https://www.openpolicyagent.org/docs/latest/#1-download-opa), or alternatively there is a provided Dockerfile to run the script in a container, mounting the appropriate files.
 
 ```bash
 ./test.sh
@@ -41,83 +41,78 @@ true
 
 ## What is a Policy?
 
+A Policy is simply a collection of Rules. Open Policy Agent will usually evaluate multiple Policies at once, called a Bundle (of Policies)
+
+By convention these are usually in a directory called `policy`. Policies are written in [Rego DSL](https://www.openpolicyagent.org/docs/latest/policy-language/).
+
 ## What is a Rule?
+
+Rules are essentially declarations in a policy (similar to a variable or constant definition) that are evaluated at runtime. They are usually evaluated against Input.
+
+Basic example is a hello rule that will evaluate to true if the Input contains a message key with a value world
+
+```rego
+hello if input.message == "world
+```
+
+You can test this rule out at the [Rego Playground](https://play.openpolicyagent.org/).
+
 ## How are Rules evaluated in a Policy?
+
+All Rules in a Policy, and all Policies in a Bundle are evaluated at runtime. Policies are specified using the data flag, so you will usually see it passed as something like  `--data policy/`
+
+## How do you provide Input?
+
+Input must be JSON, and is often either passed as a file/stream using the input flag (on the command line) or in the request body for the API. For the command line you will see it passed as something like `--input plan.json`
+
 ## How do you Query a Rule?
+
+You can only specific 1 Query per run, which usually means you will check a single Rule in a Policy.
+
+```rego
+opa eval --input plan.json --data policy/ data.enforce_policies.allow
+```
+
+Policies can be accessed as `data.*` so you can access the allow Rule in the `enforce_policies` Package, which will be in 1 of the Policies supplied.
+
 ## How do you Query multiple Rules at once? 
 
-## Decision
+Querying 1 Rule at a time is often not very useful, so you can create a Rule that queries other Rules. 
 
-```bash
-opa exec --decision 
-```
-
-Most examples will show commands such as `opa test` which uses a [subcommand](https://gobyexample.com/command-line-subcommands) such as `test`. However for Terraform, they expect you to determine a "decision" (allowed or not allowed) based on polic(ies), input (Terraform plan file) and query (from a policy in a [remote bundle](https://www.openpolicyagent.org/docs/latest/management-bundles) or 1 of the user-supplied policies, we are doing the latter in this case)
-
-The string argument referenced after `--decision` is the name of a variable in package namespace. In their example, since the package is `terraform.analysis` the argument is for the `authz` boolean, therefore `--decision terraform.analysis.authz`. So you essentially tell OPA __how__ to decide by telling it what variable to inspect.
-
-```bash
-opa exec --decision 
-```
-
-### Adding description and message to decision output
-
-By default the output from a decision will be fairly basic, simply telling you what input data was evaluated and what the result of the decision was.
-
-```json
-{
-  "result": [
-    {
-      "path": "plan.json",
-      "result": true
-    }
-  ]
-}
-```
-
-For Continuous Integration checks this is not overly useful, so you can supply a description and message if the decision is not successful.
-
-```go
-authz[msg] {
-    desc := "Sample description"
-    msg := sprintf("Sample message, score is %d, blast radius is %d", [score, blast_radius])
+```rego
+are_we_good {
     score < blast_radius
     not touches_iam
 }
 ```
 
-### Multiple decisions
+In this example, the `are_we_good` Rule is evaluated based on the score, `blast_radius` and `touches_iam` Rules. Remember that Rules are similar to variables/constants, so in this case score and `blast_radius` contain integers and `touches_iam` is a boolean.
 
-If you want to evaluate multiple decisions, you must query each variable separately (referencing their namespaced name) as an additional command line parameter.
+`score < blast_radius` also evaluates as a boolean, so the `are_we_good` Rule evaluates to true if both those statements evaluate to true. Usually multi-line Rules evaluate using AND logic (each line must evaluate to true for the Rule to be true)
 
-```bash
-opa exec --decision terraform/analysis/authz \
-  --decision terraform/analysis/something \
-  --bundle policies/ plan.json
-```
+Of course this gets more complicated with different data types, but hopefully this provides an idea of how you can gradually build up Rules for your own Policies.
 
-An alternative way to potentially do this is to include a file that includes a decision that depends on code evaluations in other files. Provided they are in the same package they should be available.
+## Writing unit tests
 
-```go
-authz {
-    score < blast_radius
-    not touches_iam
-    something # Referenced from policies/additional.rego
+Like any other code, it should have tests to prove it works as intended. Instead of user-supplied Input, you can supply it inline (wrappers such as conftest allow loading fixtures from files)
+
+```rego
+test_not_allowed_if_is_pizza if {
+    not is_burger with input as {"order":"pizza"}
 }
 ```
 
-## Policy bundle
+Sample unit tests can be found in `policies/combined_test.rego` noting that OPA will look for unit tests in `*_test.rego` files, therefore `combined_test.rego` contains tests for `combined.rego`. Tests should use the same Packages as the Rules that they are tested (so `combined.rego` and `combined_test.rego` both use the Package `package enforce_policies`)
 
-```bash
---bundle policies/
+The overall Rule that we query is `enforce_policies.allow` (the allow Rule in the overall Package) which can be found in `policy/combined.rego`. It should additionally validate Rules from other Policies, so please add/update Rules in other Packages and include them as necessary.
+
+If evaluating `enforce_policies.allow` fails, then a subsequent Query will be made to `enforce_policies.deny` to show what Rules were broken which caused the Terraform plan to not comply to our Policies. These use [Partial Rules to build up a list of error messages.](https://blog.openpolicyagent.org/rego-design-principle-1-syntax-should-reflect-real-world-policies-e1a801ab8bfb)
+
+```rego
+deny[message] {
+    not data.example.is_burger
+    message := "Only burgers are allowed"
+}
 ```
 
-Policies are either user-supplied or loaded from a remote bundle. In the provided simple example they provided in a single Rego policy file. Seemingly this will not work if you specify the path to a specific policy file (even if you only have 1) it must be a directory.
-
-## Input data
-
-```bash
-plan.json
-```
-
-The 1st (and in this case only) positional argument is the input data. It must always be JSON, so for Terraform we need to convert outputted plan files into their JSON representation.
+Please note you must update both `allow` and `deny` with any new Rules, otherwise you may get Terraform plans which are denied but no explanation as to why.
